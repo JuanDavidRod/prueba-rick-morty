@@ -1,27 +1,29 @@
 import { useState } from "react"
 import { consultCharacter } from "../api/service"
-import { type Character, type Result } from '../types'
+import { type Character } from '../types'
 
-const processDataCharacter = (data: Result[]): Character[] => {
-    return data.map( (datach: Result) => {
-        return {
-                id: datach.id,
-                name: datach.name,
-                image: datach.image
-            }
-    })
-}
+
 
 export const useCharacters = () => {
     const [characters, setCharacters] = useState<Character[] | null>(null)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
     
     const getCharacters = async () => {
-        const dataApi = await consultCharacter()
-        const processedCharacters = processDataCharacter(dataApi)
-        setCharacters(processedCharacters)
+        try {
+            setLoading(true)
+            setError(null)
+
+            const CharacterList = await consultCharacter()
+            setCharacters(CharacterList)
+        }catch (e: any){
+            setError(e.message)
+        } finally {
+            setLoading(false)
+        }
     }
         
 
 
-    return {characters, getCharacters}
+    return {characters, getCharacters, loading, error}
 }
